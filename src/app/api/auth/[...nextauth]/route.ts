@@ -3,15 +3,23 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 declare module "next-auth" {
   interface Session {
     token?: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      token?: string;
+    };
   }
 }
 
 declare module "next-auth" {
   interface User {
     token?: string;
+    id: string;
   }
 }
 
@@ -51,9 +59,8 @@ const handler = NextAuth({
         }
 
         // Aquí asumimos que el backend retorna un usuario con el campo 'id'
-        // Deberías asegurarte de que el usuario tenga la propiedad 'id'
         const user = {
-          id: data.user.id, // Asegúrate de que 'id' esté presente
+          id: data.user._id, // Asegúrate de que 'id' esté presente
           name: data.user.name,
           email: data.user.email,
         };
@@ -65,11 +72,14 @@ const handler = NextAuth({
   ],
   callbacks: {
     jwt({ token, user }) {
-      if (user) token.user = user;
+      if (user) {
+        token.user = user; // Incluye el objeto `user` en el token
+        (token.user as User).id = user.id; // Asegura que el `id` esté presente
+      }
       return token;
     },
     session({ session, token }) {
-      session.user = token.user as any;
+      session.user = token.user as any; // Incluye el objeto `user` completo del token
       return session;
     },
   },
