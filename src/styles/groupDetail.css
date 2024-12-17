@@ -1,0 +1,63 @@
+.group-detail {
+  padding: 1.5rem;
+  max-width: 700px;
+  margin: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.group-name {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.group-info {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.members-title {
+  margin-top: 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.members-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.member-item {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.member-item:hover {
+  background-color: var(--color-hover);
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--color-error);
+}

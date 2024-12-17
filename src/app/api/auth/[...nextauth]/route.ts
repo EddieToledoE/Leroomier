@@ -11,6 +11,7 @@ declare module "next-auth" {
       id: string;
       name: string;
       email: string;
+      username: string;
       token?: string;
     };
   }
@@ -63,9 +64,9 @@ const handler = NextAuth({
           id: data.user._id, // Asegúrate de que 'id' esté presente
           name: data.user.name,
           email: data.user.email,
+          username: data.user.username,
         };
         const token = data.token; // Guardamos el token en el JWT
-        console.log(token);
         return { ...user, token };
       },
     }),

@@ -1,7 +1,10 @@
 "use client";
+
 import { useState } from "react";
-import { signIn } from "next-auth/react"; // Usamos la función `signIn` de next-auth
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "./themeToggle"; // Botón para cambiar tema
+import "./styles/login.css"; // Archivo CSS para estilos específicos del login
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,30 +19,29 @@ export default function Login() {
     setError(null);
 
     const result = await signIn("credentials", {
-      redirect: false, // Evitar redirección automática
+      redirect: false,
       email,
       password,
     });
 
     if (result?.error) {
-      setError(result.error); // Si hay error, mostramos el mensaje
+      setError(result.error);
       setIsLoading(false);
     } else {
-      // Redirigir a la página principal o la que prefieras después de iniciar sesión
-      router.push("/menu"); // O cualquier otra página a la que quieras redirigir
+      router.push("/menu");
     }
   };
 
   const handleForgotPassword = () => {
-    // Redirigir a la página de recuperación de contraseña
     router.push("/forgot-password");
   };
 
   return (
-    <div>
+    <div className="login-container">
+      <ThemeToggle /> {/* Botón para alternar tema */}
       <h1>Iniciar sesión</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="form-group">
           <label htmlFor="email">Correo electrónico</label>
           <input
             type="email"
@@ -48,9 +50,10 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="form-input"
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="password">Contraseña</label>
           <input
             type="password"
@@ -59,21 +62,17 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="form-input"
           />
         </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}{" "}
-        {/* Mostrar errores */}
-        <button type="submit" disabled={isLoading}>
+        {error && <p className="error-message">{error}</p>}
+        <button type="submit" disabled={isLoading} className="submit-button">
           {isLoading ? "Cargando..." : "Iniciar sesión"}
         </button>
       </form>
-
-      <div>
-        {/* Enlace o botón para redirigir a la página de recuperar contraseña */}
-        <button onClick={handleForgotPassword} style={{ marginTop: "10px" }}>
-          Olvidé mi contraseña
-        </button>
-      </div>
+      <button onClick={handleForgotPassword} className="forgot-password-button">
+        Olvidé mi contraseña
+      </button>
     </div>
   );
 }

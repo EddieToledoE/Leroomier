@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
+import "@/styles/forgotPassword.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -22,10 +23,10 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div>
-      <h1>Recupera tu contraseña</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="forgot-password-container">
+      <h1 className="forgot-password-title">Recupera tu contraseña</h1>
+      <form onSubmit={handleSubmit} className="forgot-password-form">
+        <div className="form-group">
           <label htmlFor="email">Correo electrónico</label>
           <input
             type="email"
@@ -36,10 +37,12 @@ export default function ForgotPassword() {
           />
         </div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {message && <p style={{ color: "green" }}>{message}</p>}
+        {error && <p className="forgot-password-error">{error}</p>}
+        {message && <p className="forgot-password-message">{message}</p>}
 
-        <button type="submit">Enviar enlace de recuperación</button>
+        <button type="submit" className="forgot-password-button">
+          Enviar enlace de recuperación
+        </button>
       </form>
     </div>
   );

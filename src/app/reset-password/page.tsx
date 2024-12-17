@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import "@/styles/resetPassword.css"; // Importar estilos
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -31,7 +33,6 @@ export default function ResetPassword() {
       setSuccess(response.data.message);
       setError(null);
 
-      // Redirigir al login después de 3 segundos
       setTimeout(() => router.push("/"), 3000);
     } catch (err: any) {
       setLoading(false);
@@ -43,10 +44,10 @@ export default function ResetPassword() {
   };
 
   return (
-    <div>
-      <h1>Restablecer contraseña</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="reset-password-container">
+      <h1 className="reset-password-title">Restablecer contraseña</h1>
+      <form onSubmit={handleSubmit} className="reset-password-form">
+        <div className="form-group">
           <label htmlFor="password">Nueva contraseña</label>
           <input
             type="password"
@@ -57,7 +58,7 @@ export default function ResetPassword() {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label htmlFor="confirmPassword">Confirmar contraseña</label>
           <input
             type="password"
@@ -68,10 +69,14 @@ export default function ResetPassword() {
           />
         </div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
+        {error && <p className="reset-password-error">{error}</p>}
+        {success && <p className="reset-password-success">{success}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="reset-password-button"
+        >
           {loading ? "Cargando..." : "Restablecer contraseña"}
         </button>
       </form>

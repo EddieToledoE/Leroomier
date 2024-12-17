@@ -1,27 +1,27 @@
 "use client";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import SearchUsers from "../../../components/searchUsers";
-import FriendRequests from "../../../components/friendRequest";
+import ExpenseList from "../../../components/expenseList";
+import GroupList from "../../../components/groupSelector";
 export default function Menu() {
   const [user, setUser] = useState("");
   const [userId, setUserId] = useState("");
+  const [username, setUsername] = useState("");
   const { data: session, status } = useSession();
 
   useEffect(() => {
     if (status === "authenticated") {
       setUser(session.user?.name || "");
       setUserId(session.user?.id || "");
+      setUsername(session.user?.username || "");
     }
   }, [status, session]);
 
   return (
     <div>
-      <h1>Menu</h1>
       <h2> Bienvenido {user}</h2>
-      <SearchUsers />
-      <FriendRequests userId={userId} />
-      <button onClick={() => signOut()}>CERRAR SESIÓN</button>
+      <GroupList userId={userId} username={username} />
+      <ExpenseList userId={userId} />
     </div>
   );
 }

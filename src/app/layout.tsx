@@ -1,8 +1,9 @@
 "use client";
 
-import { Inter } from "next/font/google";
+import { ThemeProvider } from "../../components/themeContext";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
+import Navbar from "../../components/navBar"; // Importar la Navbar
 
 export default function RootLayout({
   children,
@@ -11,9 +12,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>
-        <SessionProvider>{children}</SessionProvider>
-      </body>
+      <ThemeProvider>
+        <SessionProvider>
+          <body>
+            <AuthenticatedLayout>{children}</AuthenticatedLayout>
+          </body>
+        </SessionProvider>
+      </ThemeProvider>
     </html>
   );
+}
+
+// Layout dinámico para mostrar la Navbar solo si el usuario está autenticado
+function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const { status } = useSession();
+
+  if (status === "authenticated") {
+    // Si el usuario está logeado, mostramos la Navbar junto con los hijos
+    return (
+      <>
+        <Navbar />
+        <main>{children}</main>
+      </>
+    );
+  }
+
+  // Si el usuario no está logeado, renderizamos solo los hijos (sin Navbar)
+  return <main>{children}</main>;
 }
