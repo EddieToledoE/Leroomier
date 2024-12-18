@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import CreateExpense from "../../../../components/createExpense";
 import "@/styles/groupDetail.css";
-import ExpenseList from "../../../../components/expensesByGroup";
-import { create } from "domain";
+import ExpenseListByGroup from "../../../../components/expensesByGroup";
 import { useSession } from "next-auth/react";
 type Group = {
   _id: string;
@@ -82,7 +80,7 @@ const GroupDetail = () => {
         <p>Detalles no disponibles.</p>
       )}
       {group && (
-        <ExpenseList
+        <ExpenseListByGroup
           groupId={group._id}
           groupMembers={group.members}
           userId={userId}

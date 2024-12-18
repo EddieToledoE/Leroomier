@@ -96,13 +96,14 @@ const Notifications = ({ userId }: { userId: string }) => {
       fetchNotifications(); // Actualizar notificaciones
     } catch (err) {
       Swal.fire("Error", "No se pudo rechazar el pago.", "error");
+      console.log(err);
     }
   };
 
   // Marcar como leído
   const handleMarkAsRead = async (id: string) => {
     try {
-      await axios.patch(
+      await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/notifications/read/${id}`
       );
       fetchNotifications(); // Actualizar notificaciones

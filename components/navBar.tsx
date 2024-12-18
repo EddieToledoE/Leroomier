@@ -29,6 +29,10 @@ const Navbar = () => {
   const handleNotificacionts = () => {
     router.push("/notifications");
   };
+
+  const handleFriends = () => {
+    router.push("/friends");
+  };
   return (
     <nav
       style={{
@@ -47,7 +51,12 @@ const Navbar = () => {
         LeRoomier
       </h1>
       <ThemeToggle />
-      <h4 style={{ margin: "0 1rem", color: "var(--color-text)" }}>Amigos</h4>
+      <h4
+        onClick={handleFriends}
+        style={{ margin: "0 1rem", color: "var(--color-text)" }}
+      >
+        Amigos
+      </h4>
       <h4
         onClick={handleNotificacionts}
         style={{ margin: "0 1rem", color: "var(--color-text)" }}

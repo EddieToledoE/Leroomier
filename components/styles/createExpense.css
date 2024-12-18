@@ -1,16 +1,17 @@
 .create-expense-container {
-  padding: 1rem;
+  padding: 1.5rem;
   max-width: 600px;
   margin: auto;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  border: 1px solid #ddd;
   border-radius: 8px;
+  background-color: var(--color-bg, #fff);
+  color: var(--color-text, #333);
 }
 
-h2,
-h3 {
-  margin-bottom: 1rem;
+.create-expense-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--color-primary, #0070f3);
 }
 
 .input-group {
@@ -19,17 +20,89 @@ h3 {
 
 .input-group label {
   display: block;
-  font-weight: bold;
   margin-bottom: 0.5rem;
+  font-weight: bold;
 }
 
 .input-group input {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: var(--color-input-bg);
-  color: var(--color-input-text);
+}
+
+.split-options {
+  margin: 1rem 0;
+}
+
+.split-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.equal-split-amount {
+  color: #0070f3;
+  font-weight: bold;
+}
+
+.expensebutton {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.expensebutton:disabled {
+  background-color: #bbb;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc3545;
+  text-align: center;
+}
+
+.success {
+  color: #28a745;
+  text-align: center;
+}
+
+.create-expense-container {
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: var(--color-bg, #fff);
+  color: var(--color-text, #333);
+}
+
+h2 {
+  text-align: center;
+  color: #0070f3;
+}
+
+.input-group,
+.split-options {
+  margin-bottom: 1rem;
+}
+
+label {
+  font-weight: bold;
+}
+
+.split-options label {
+  display: block;
+  margin: 0.5rem 0;
 }
 
 .split-row {
@@ -39,40 +112,23 @@ h3 {
   margin-bottom: 0.5rem;
 }
 
-.split-row label {
-  flex-grow: 1;
-}
-
 .split-input {
-  width: 70px;
+  width: 100px;
   padding: 0.3rem;
-  border: 1px solid var(--color-border);
-  border-radius: 5px;
-  background-color: var(--color-input-bg);
-  color: var(--color-input-text);
+  margin-left: 1rem;
 }
 
-.submit-button {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: var(--color-primary);
-  color: var(--color-bg);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.submit-button:disabled {
-  background-color: var(--color-disabled);
-  cursor: not-allowed;
+.equal-split-amount {
+  font-weight: bold;
+  color: #0070f3;
 }
 
 .error {
-  color: var(--color-error);
-  margin-bottom: 1rem;
+  color: #dc3545;
+  text-align: center;
 }
 
 .success {
-  color: var(--color-success);
-  margin-bottom: 1rem;
+  color: #28a745;
+  text-align: center;
 }

@@ -1,0 +1,83 @@
+/* Contenedor principal */
+.friend-container {
+  padding: 1rem;
+  max-width: 600px;
+  margin: auto;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos */
+.friend-container h2,
+.friend-container h3 {
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 0.5rem;
+  color: var(--color-primary);
+}
+
+/* Listas */
+.friend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.friend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background-color: var(--color-card-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones */
+.friend-button {
+  padding: 0.3rem 0.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.friend-button.accept {
+  background-color: #28a745;
+  color: white;
+}
+
+.friend-button.reject {
+  background-color: #dc3545;
+  color: white;
+}
+
+.friend-button.disabled {
+  background-color: var(--color-disabled);
+  color: var(--color-border);
+  cursor: not-allowed;
+}
+
+.friend-button.search {
+  background-color: #0070f3;
+  color: white;
+}
+
+.friend-button:hover:not(.disabled) {
+  opacity: 0.8;
+}
+
+/* Entradas */
+.friend-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background-color: var(--color-input-bg);
+  color: var(--color-text);
+}

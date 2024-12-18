@@ -18,11 +18,15 @@ type CreateExpenseProps = {
 const CreateExpense = ({ groupId, members, paidBy }: CreateExpenseProps) => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState<number>(0);
+  const [splitMode, setSplitMode] = useState<"manual" | "equal" | "percentage">(
+    "manual"
+  );
   const [splitDetails, setSplitDetails] = useState(
     members.map((member) => ({
       userId: member._id,
       username: member.username,
       customAmountOwed: 0,
+      customPercentage: 0,
       selected: false,
     }))
   );
@@ -30,64 +34,92 @@ const CreateExpense = ({ groupId, members, paidBy }: CreateExpenseProps) => {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleCustomAmountChange = (index: number, value: string) => {
-    const updatedSplitDetails = [...splitDetails];
-    updatedSplitDetails[index].customAmountOwed = parseFloat(value) || 0;
-    setSplitDetails(updatedSplitDetails);
+  // Actualizar monto total
+  const handleAmountChange = (value: string) => {
+    const newAmount = parseFloat(value) || 0;
+    setAmount(newAmount);
+    if (splitMode === "equal") updateEqualSplit(newAmount);
+    if (splitMode === "percentage") updatePercentageSplit(newAmount);
+  };
+
+  // Cambiar modo de división
+  const handleSplitModeChange = (mode: "manual" | "equal" | "percentage") => {
+    setSplitMode(mode);
+    if (mode === "equal") updateEqualSplit(amount);
+    if (mode === "percentage") updatePercentageSplit(amount);
+  };
+
+  // División igualitaria
+  const updateEqualSplit = (totalAmount: number) => {
+    const selectedMembers = splitDetails.filter((member) => member.selected);
+    const equalAmount = selectedMembers.length
+      ? totalAmount / selectedMembers.length
+      : 0;
+
+    const updatedDetails = splitDetails.map((member) =>
+      member.selected
+        ? { ...member, customAmountOwed: parseFloat(equalAmount.toFixed(2)) }
+        : { ...member, customAmountOwed: 0 }
+    );
+    setSplitDetails(updatedDetails);
+  };
+
+  // División por porcentajes
+  const updatePercentageSplit = (totalAmount: number) => {
+    const updatedDetails = splitDetails.map((member) => ({
+      ...member,
+      customAmountOwed: member.selected
+        ? parseFloat(((member.customPercentage / 100) * totalAmount).toFixed(2))
+        : 0,
+    }));
+    setSplitDetails(updatedDetails);
   };
 
   const handleMemberSelection = (index: number) => {
-    const updatedSplitDetails = [...splitDetails];
-    updatedSplitDetails[index].selected = !updatedSplitDetails[index].selected;
-    setSplitDetails(updatedSplitDetails);
+    const updatedDetails = [...splitDetails];
+    updatedDetails[index].selected = !updatedDetails[index].selected;
+    setSplitDetails(updatedDetails);
+    if (splitMode === "equal") updateEqualSplit(amount);
+    if (splitMode === "percentage") updatePercentageSplit(amount);
+  };
+
+  const handlePercentageChange = (index: number, value: string) => {
+    const newPercentage = Math.min(Math.max(parseFloat(value) || 0, 0), 100);
+    const updatedDetails = [...splitDetails];
+    updatedDetails[index].customPercentage = newPercentage;
+
+    const totalPercentage = updatedDetails.reduce(
+      (sum, member) => (member.selected ? sum + member.customPercentage : sum),
+      0
+    );
+
+    if (totalPercentage > 100) {
+      setError("La suma de los porcentajes no puede superar el 100%.");
+      return;
+    } else {
+      setError(null);
+    }
+
+    setSplitDetails(updatedDetails);
+    updatePercentageSplit(amount);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    if (!description.trim() || amount <= 0) {
-      setError("La descripción y el monto deben ser válidos.");
-      setLoading(false);
-      return;
-    }
-
-    // Filtrar solo los miembros seleccionados
     const selectedMembers = splitDetails.filter((member) => member.selected);
-
-    if (selectedMembers.length === 0) {
-      setError("Debe seleccionar al menos un miembro para dividir el gasto.");
-      setLoading(false);
-      return;
-    }
-
     const totalSplit = selectedMembers.reduce(
-      (total, detail) => total + detail.customAmountOwed,
+      (sum, member) => sum + member.customAmountOwed,
       0
     );
 
     if (totalSplit !== amount) {
-      setError(
-        "El monto total no coincide con la suma de los montos divididos."
-      );
-      setLoading(false);
+      setError("La suma de los montos no coincide con el monto total.");
       return;
     }
 
+    setLoading(true);
     try {
-      console.log({
-        groupId,
-        description,
-        amount,
-        paidBy,
-        splitBetween: selectedMembers.map(({ userId, customAmountOwed }) => ({
-          userId,
-          customAmountOwed,
-        })),
-      });
-      const response = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/expenses/create`,
         {
           groupId,
@@ -100,20 +132,9 @@ const CreateExpense = ({ groupId, members, paidBy }: CreateExpenseProps) => {
           })),
         }
       );
-
-      setSuccess(`Gasto "${response.data.description}" creado con éxito.`);
-      setDescription("");
-      setAmount(0);
-      setSplitDetails(
-        members.map((member) => ({
-          userId: member._id,
-          username: member.username,
-          customAmountOwed: 0,
-          selected: false,
-        }))
-      );
-    } catch (err: any) {
-      setError(err.response?.data?.error || "No se pudo crear el gasto.");
+      setSuccess("Gasto creado exitosamente.");
+    } catch {
+      setError("Hubo un error al crear el gasto.");
     } finally {
       setLoading(false);
     }
@@ -127,53 +148,92 @@ const CreateExpense = ({ groupId, members, paidBy }: CreateExpenseProps) => {
 
       <form onSubmit={handleSubmit}>
         <div className="input-group">
-          <label htmlFor="description">Descripción</label>
+          <label>Descripción</label>
           <input
             type="text"
-            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           />
         </div>
-
         <div className="input-group">
-          <label htmlFor="amount">Monto Total</label>
+          <label>Monto Total</label>
           <input
             type="number"
-            id="amount"
             value={amount}
-            onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-            required
+            onChange={(e) => handleAmountChange(e.target.value)}
           />
         </div>
 
-        <h3>División del Gasto</h3>
-        {splitDetails.map((detail, index) => (
-          <div key={detail.userId} className="split-row">
+        <div className="split-options">
+          <label>
+            <input
+              type="radio"
+              checked={splitMode === "manual"}
+              onChange={() => handleSplitModeChange("manual")}
+            />
+            División Manual
+          </label>
+          <label>
+            <input
+              type="radio"
+              checked={splitMode === "equal"}
+              onChange={() => handleSplitModeChange("equal")}
+            />
+            Dividir Igualitariamente
+          </label>
+          <label>
+            <input
+              type="radio"
+              checked={splitMode === "percentage"}
+              onChange={() => handleSplitModeChange("percentage")}
+            />
+            Dividir por Porcentajes
+          </label>
+        </div>
+
+        {splitDetails.map((member, index) => (
+          <div key={member.userId} className="split-row">
             <label>
               <input
                 type="checkbox"
-                checked={detail.selected}
+                checked={member.selected}
                 onChange={() => handleMemberSelection(index)}
               />
-              {detail.username}
+              {member.username}
             </label>
-            {detail.selected && (
+            {member.selected && splitMode === "manual" && (
               <input
                 type="number"
-                value={detail.customAmountOwed}
-                onChange={(e) =>
-                  handleCustomAmountChange(index, e.target.value)
-                }
-                className="split-input"
                 placeholder="Monto"
+                value={member.customAmountOwed}
+                onChange={(e) => {
+                  const newDetails = [...splitDetails];
+                  newDetails[index].customAmountOwed =
+                    parseFloat(e.target.value) || 0;
+                  setSplitDetails(newDetails);
+                }}
               />
+            )}
+            {member.selected && splitMode === "percentage" && (
+              <>
+                <input
+                  type="number"
+                  placeholder="Porcentaje"
+                  value={member.customPercentage}
+                  onChange={(e) =>
+                    handlePercentageChange(index, e.target.value)
+                  }
+                />
+                <span>${member.customAmountOwed.toFixed(2)}</span>
+              </>
+            )}
+            {member.selected && splitMode === "equal" && (
+              <span>${member.customAmountOwed.toFixed(2)}</span>
             )}
           </div>
         ))}
 
-        <button type="submit" disabled={loading} className="submit-button">
+        <button type="submit" disabled={loading}>
           {loading ? "Creando..." : "Crear Gasto"}
         </button>
       </form>

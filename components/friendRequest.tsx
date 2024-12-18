@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
+import "./styles/friendRequest.css";
 
 type UserRequest = {
   _id: string;
@@ -21,7 +23,7 @@ const FriendRequests = ({ userId }: { userId: string }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!userId) return; // No hacer la solicitud si `userId` es undefined
+      if (!userId) return;
 
       setLoading(true);
       setError(null);
@@ -31,40 +33,35 @@ const FriendRequests = ({ userId }: { userId: string }) => {
         );
         setUser(data);
       } catch (err: any) {
-        setError(err.response?.data?.error || "No se pudo cargar el usuario.");
+        setError("Error al cargar las solicitudes.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [userId]); // Solo se ejecuta cuando `userId` cambia
+  }, [userId]);
 
-  const handleAcceptRequest = async (
-    requestUsername: string,
-    requestId: string
-  ) => {
-    console.log("userId:", userId); // Depura el userId
-    console.log("requestId:", requestId); // Depura el requestId
-
+  const handleAcceptRequest = async (requestId: string, username: string) => {
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/friend/accept/${userId}`,
         { friendId: requestId }
       );
-      alert("Solicitud aceptada.");
+      Swal.fire(
+        "Solicitud aceptada",
+        `${username} es ahora tu amigo.`,
+        "success"
+      );
       setUser((prev) => ({
         ...prev!,
         incomingRequests: prev!.incomingRequests.filter(
           (req) => req._id !== requestId
         ),
-        friends: [
-          ...prev!.friends,
-          { _id: requestId, username: requestUsername },
-        ],
+        friends: [...prev!.friends, { _id: requestId, username }],
       }));
-    } catch (err: any) {
-      alert(err.response?.data?.error || "No se pudo aceptar la solicitud.");
+    } catch {
+      Swal.fire("Error", "No se pudo aceptar la solicitud.", "error");
     }
   };
 
@@ -74,65 +71,58 @@ const FriendRequests = ({ userId }: { userId: string }) => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/friend/reject/${userId}`,
         { friendId: requestId }
       );
-      alert("Solicitud rechazada.");
+      Swal.fire("Solicitud rechazada", "Has rechazado la solicitud.", "info");
       setUser((prev) => ({
         ...prev!,
         incomingRequests: prev!.incomingRequests.filter(
           (req) => req._id !== requestId
         ),
       }));
-    } catch (err: any) {
-      alert(err.response?.data?.error || "No se pudo rechazar la solicitud.");
+    } catch {
+      Swal.fire("Error", "No se pudo rechazar la solicitud.", "error");
+    }
+  };
+
+  const handleRemoveFriend = async (friendId: string) => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/friend/remove/${userId}`,
+        { friendId }
+      );
+      Swal.fire("Amigo eliminado", "Has eliminado a este amigo.", "info");
+      setUser((prev) => ({
+        ...prev!,
+        friends: prev!.friends.filter((friend) => friend._id !== friendId),
+      }));
+    } catch {
+      Swal.fire("Error", "No se pudo eliminar al amigo.", "error");
     }
   };
 
   if (loading) return <p>Cargando...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (error) return <p className="error">{error}</p>;
 
   return (
-    <div style={{ padding: "1rem", maxWidth: "600px", margin: "auto" }}>
+    <div className="friend-container">
       <h2>Solicitudes de Amistad</h2>
 
       {/* Solicitudes Entrantes */}
       <h3>Solicitudes Entrantes</h3>
       {user?.incomingRequests.length ? (
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <ul className="friend-list">
           {user.incomingRequests.map((req) => (
-            <li
-              key={req._id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.5rem",
-                borderBottom: "1px solid #ccc",
-              }}
-            >
+            <li key={req._id} className="friend-item">
               <span>{req.username}</span>
-              <span>{req._id}</span>
               <div>
                 <button
-                  onClick={() => handleAcceptRequest(req.username, req._id)}
-                  style={{
-                    marginRight: "0.5rem",
-                    backgroundColor: "#28a745",
-                    color: "#fff",
-                    border: "none",
-                    padding: "0.3rem 0.5rem",
-                    cursor: "pointer",
-                  }}
+                  onClick={() => handleAcceptRequest(req._id, req.username)}
+                  className="friend-button accept"
                 >
                   Aceptar
                 </button>
                 <button
                   onClick={() => handleRejectRequest(req._id)}
-                  style={{
-                    backgroundColor: "#dc3545",
-                    color: "#fff",
-                    border: "none",
-                    padding: "0.3rem 0.5rem",
-                    cursor: "pointer",
-                  }}
+                  className="friend-button reject"
                 >
                   Rechazar
                 </button>
@@ -141,54 +131,42 @@ const FriendRequests = ({ userId }: { userId: string }) => {
           ))}
         </ul>
       ) : (
-        <p>No tienes solicitudes entrantes.</p>
-      )}
-
-      {/* Solicitudes Enviadas */}
-      <h3>Solicitudes Enviadas</h3>
-      {user?.outgoingRequests.length ? (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {user.outgoingRequests.map((req) => (
-            <li
-              key={req._id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.5rem",
-                borderBottom: "1px solid #ccc",
-              }}
-            >
-              <span>{req.username}</span>
-              <span>Enviada</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No has enviado solicitudes.</p>
+        <p>No tienes solicitudes pendientes.</p>
       )}
 
       {/* Amigos */}
       <h3>Amigos</h3>
       {user?.friends.length ? (
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <ul className="friend-list">
           {user.friends.map((friend) => (
-            <li
-              key={friend._id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0.5rem",
-                borderBottom: "1px solid #ccc",
-              }}
-            >
+            <li key={friend._id} className="friend-item">
               <span>{friend.username}</span>
+              <button
+                onClick={() => handleRemoveFriend(friend._id)}
+                className="friend-button remove"
+              >
+                Eliminar
+              </button>
             </li>
           ))}
         </ul>
       ) : (
         <p>No tienes amigos.</p>
+      )}
+
+      {/* Solicitudes Enviadas */}
+      <h3>Solicitudes Enviadas</h3>
+      {user?.outgoingRequests.length ? (
+        <ul className="friend-list">
+          {user.outgoingRequests.map((req) => (
+            <li key={req._id} className="friend-item">
+              <span>{req.username}</span>
+              <span>Solicitud Enviada</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No has enviado solicitudes.</p>
       )}
     </div>
   );

@@ -16,6 +16,7 @@ type ExpenseUser = {
   _id: string;
   expenseId: Expense;
   amountOwed: number;
+  initialAmount: number;
   paid: boolean;
 };
 
@@ -130,7 +131,7 @@ const ExpenseList = ({ userId }: { userId: string }) => {
                 <p>
                   <strong>{expense.expenseId.description}</strong>
                 </p>
-                <p>Monto: ${expense.amountOwed.toFixed(2)}</p>
+                <p>Monto: ${expense.initialAmount.toFixed(2)}</p>
               </li>
             ))}
           </ul>
